@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import {streamAgentResponse} from "@/actions/2_streaming";
 import { streamBookingAgentResponse } from '@/actions/3_tools';
+import {streamWithHumanInTheLoop} from "@/actions/4_human-in-the-loop";
 
 
 type Message = {
@@ -20,7 +21,7 @@ const generateId = (() => {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Automatically scroll to the bottom when messages change
@@ -31,7 +32,7 @@ export default function ChatPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
-    
+
 
     if (!inputValue.trim()) return
 
@@ -60,8 +61,9 @@ export default function ChatPage() {
       }])
 
       // Start streaming
-      const stream = await streamAgentResponse(userPrompt)
+      // const stream = await streamAgentResponse(userPrompt)
       // const stream = await streamBookingAgentResponse(userPrompt)
+      const stream = await streamWithHumanInTheLoop(userPrompt)
       const reader = stream.getReader()
 
       // Process the stream
@@ -91,7 +93,7 @@ export default function ChatPage() {
         role: 'ai',
         content: 'Sorry, there was an error processing your request.'
       }])
-    } 
+    }
   }
 
   return (
@@ -134,11 +136,11 @@ export default function ChatPage() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Type your message here..."
-                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"                
+                  className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
               />
               <button
                   type="submit"
-                  className={`bg-black text-white border border-orange-400 px-4 py-2 rounded-lg opacity-50 focus:outline-none cursor-pointer`}               
+                  className={`bg-black text-white border border-orange-400 px-4 py-2 rounded-lg opacity-50 focus:outline-none cursor-pointer`}
               >
                 Send
               </button>
