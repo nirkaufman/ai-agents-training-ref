@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react'
 import {streamAgentResponse} from "@/actions/2_streaming";
 import { streamBookingAgentResponse } from '@/actions/3_tools';
 import {streamWithHumanInTheLoop} from "@/actions/4_human-in-the-loop";
+import {streamSupervisorResponse} from "@/actions/5_supervisor";
 
 
 type Message = {
@@ -63,7 +64,8 @@ export default function ChatPage() {
       // Start streaming
       // const stream = await streamAgentResponse(userPrompt)
       // const stream = await streamBookingAgentResponse(userPrompt)
-      const stream = await streamWithHumanInTheLoop(userPrompt)
+      // const stream = await streamWithHumanInTheLoop(userPrompt)
+      const stream = await streamSupervisorResponse(userPrompt)
       const reader = stream.getReader()
 
       // Process the stream

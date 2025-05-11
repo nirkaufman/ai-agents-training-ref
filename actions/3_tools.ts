@@ -119,7 +119,6 @@ const llm = new ChatOpenAI({
 
 const checkpointer = new MemorySaver();
 
-
 const agent = createReactAgent({
   llm,
   checkpointer,
@@ -150,7 +149,7 @@ export async function streamBookingAgentResponse(input: string) {
     ] },
     {
       configurable: {
-        thread_id: 1,       
+        thread_id: 1,
       }
     }
   );
@@ -163,7 +162,7 @@ export async function streamBookingAgentResponse(input: string) {
           if (chunk.agent?.messages?.[0]?.content) {
             controller.enqueue(chunk.agent.messages[0].content);
           }
-          
+
           // Handle tool messages
           if (chunk.tools?.messages) {
             chunk.tools.messages.forEach((msg: ToolMessage) => {
