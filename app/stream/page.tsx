@@ -5,6 +5,7 @@ import {streamAgentResponse} from "@/actions/2_streaming";
 import { streamBookingAgentResponse } from '@/actions/3_tools';
 import {streamWithHumanInTheLoop} from "@/actions/4_human-in-the-loop";
 import {streamSupervisorResponse} from "@/actions/5_supervisor";
+import {streamSwarmResponse} from "@/actions/6_swarm";
 
 
 type Message = {
@@ -65,7 +66,8 @@ export default function ChatPage() {
       // const stream = await streamAgentResponse(userPrompt)
       // const stream = await streamBookingAgentResponse(userPrompt)
       // const stream = await streamWithHumanInTheLoop(userPrompt)
-      const stream = await streamSupervisorResponse(userPrompt)
+      // const stream = await streamSupervisorResponse(userPrompt)
+      const stream = await streamSwarmResponse(userPrompt)
       const reader = stream.getReader()
 
       // Process the stream
