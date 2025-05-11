@@ -4,6 +4,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import {LangGraphRunnableConfig} from "@langchain/langgraph";
 
 // Weather tool definition
 const getWeather = tool(
@@ -17,6 +18,21 @@ const getWeather = tool(
       city: z.string().describe("The city to get the weather for"),
     }),
   }
+);
+
+// example for custom updates stream
+const getWeatherWithUpdates = tool(
+    async (input: { city: string }, config: LangGraphRunnableConfig) => {
+      config.writer?.(`Looking up data for city: ${input.city}`);
+      return `It's always sunny in ${input.city}!`;
+    },
+    {
+      name: "getWeather",
+      schema: z.object({
+        city: z.string().describe("The city to get the weather for"),
+      }),
+      description: "Get weather for a given city.",
+    }
 );
 
 // Set up the LLM
@@ -38,7 +54,8 @@ export async function streamAgentResponse(prompt: string) {
   // Initialize the agent streaming process
   const agentStream = await agent.stream(
     { messages: [{ role: "user", content: prompt }] },
-    { streamMode: "updates" }
+    { streamMode: "updates"},
+    // { streamMode: ["updates"] }
   );
 
   return new ReadableStream({
@@ -72,6 +89,7 @@ export async function streamAgentResponse(prompt: string) {
             }
           }
         }
+
         else if (chunk.generated) {
           // Generated reasoning
           controller.enqueue(`Thinking: ${chunk.generated}`);
