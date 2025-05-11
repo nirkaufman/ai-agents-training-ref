@@ -136,3 +136,27 @@ export async function weatherAgent3(userName: string, prompt: string) {
     }))
   };
 }
+
+
+// Example of how to set a recursion limit
+const maxIterations = 3;
+const recursionLimit = 2 * maxIterations + 1;
+
+const agent4 = createReactAgent({
+  llm,
+  tools: [getWeather]
+});
+
+const agentWithRecursionLimit = agent.withConfig({ recursionLimit });
+
+
+// Example of how to set a response format
+const WeatherResponse = z.object({
+  conditions: z.string()
+});
+
+const agent5 = createReactAgent({
+  llm,
+  tools: [getWeather],
+  responseFormat: WeatherResponse  
+});
