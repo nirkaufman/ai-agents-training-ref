@@ -60,8 +60,8 @@ export default function ChatPage() {
       }])
 
       // Start streaming
-      // const stream = await streamAgentResponse(userPrompt)
-      const stream = await streamBookingAgentResponse(userPrompt)
+      const stream = await streamAgentResponse(userPrompt)
+      // const stream = await streamBookingAgentResponse(userPrompt)
       const reader = stream.getReader()
 
       // Process the stream

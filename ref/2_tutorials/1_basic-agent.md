@@ -157,4 +157,165 @@ export async function weatherAgent3(userName: string, prompt: string) {
 2. Implement error handling and retry logic
 3. Add conversation history management
 4. Implement streaming responses
-5. Add authentication and user management 
+5. Add authentication and user management
+
+# Tutorial: Implementing Tools in LangGraph Agents
+
+## Introduction
+In this tutorial, we'll learn how to implement and use tools in LangGraph agents. Tools are essential for extending agent capabilities with custom functionality.
+
+## Prerequisites
+- Basic understanding of TypeScript
+- Familiarity with Zod schemas
+- Knowledge of async/await
+
+## Step 1: Basic Tool Implementation
+
+Let's start with a simple weather tool:
+
+```typescript
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
+
+const weatherTool = tool(
+  async (input: { city: string }) => {
+    return `The weather in ${input.city} is sunny and 72°F!`;
+  },
+  {
+    name: "getWeather",
+    description: "Get weather for a given city.",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
+);
+```
+
+## Step 2: Tool with State and Updates
+
+Let's create a more advanced tool that uses state and provides updates:
+
+```typescript
+import { LangGraphRunnableConfig } from "@langchain/langgraph";
+
+const weatherToolWithUpdates = tool(
+  async (input: { city: string }, config: LangGraphRunnableConfig) => {
+    // Provide progress updates
+    config.writer?.(`Fetching weather for ${input.city}...`);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return `The weather in ${input.city} is sunny and 72°F!`;
+  },
+  {
+    name: "getWeather",
+    description: "Get weather for a given city.",
+    schema: z.object({
+      city: z.string().describe("The city to get the weather for"),
+    }),
+  }
+);
+```
+
+## Step 3: Tool with Direct Return
+
+Sometimes you want to return the tool result directly:
+
+```typescript
+const calculatorTool = tool(
+  async (input: { a: number; b: number }) => {
+    return input.a + input.b;
+  },
+  {
+    name: "calculator",
+    description: "Add two numbers.",
+    schema: z.object({
+      a: z.number().describe("First number"),
+      b: z.number().describe("Second number"),
+    }),
+    returnDirect: true
+  }
+);
+```
+
+## Step 4: Tool with Error Handling
+
+Let's add proper error handling:
+
+```typescript
+const safeCalculatorTool = tool(
+  async (input: { expression: string }) => {
+    try {
+      // Note: In a real application, use a proper expression parser
+      const result = eval(input.expression);
+      return `The result is ${result}`;
+    } catch (error) {
+      return `Error calculating expression: ${error.message}`;
+    }
+  },
+  {
+    name: "calculator",
+    description: "Calculate a mathematical expression.",
+    schema: z.object({
+      expression: z.string().describe("The expression to calculate"),
+    }),
+  }
+);
+```
+
+## Step 5: Integrating Tools with Agent
+
+Now let's create an agent that uses these tools:
+
+```typescript
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { ChatOpenAI } from "@langchain/openai";
+
+const llm = new ChatOpenAI({
+  model: "gpt-4o-mini",
+  temperature: 0,
+});
+
+const agent = createReactAgent({
+  llm,
+  tools: [weatherTool, calculatorTool, safeCalculatorTool],
+  prompt: "You are a helpful assistant that can check the weather and do math."
+});
+```
+
+## Best Practices
+
+1. **Tool Design**
+   - Keep tools focused and single-purpose
+   - Use clear, descriptive names
+   - Provide detailed descriptions
+   - Include example usage in descriptions
+
+2. **Schema Definition**
+   - Use descriptive field names
+   - Add helpful descriptions
+   - Use appropriate Zod types
+   - Include validation rules
+
+3. **Error Handling**
+   - Always handle potential errors
+   - Provide meaningful error messages
+   - Use try-catch blocks
+   - Consider fallback options
+
+4. **Performance**
+   - Keep tools lightweight
+   - Use async/await properly
+   - Consider caching for expensive operations
+   - Provide progress updates for long operations
+
+## Next Steps
+- Implement more complex tools
+- Add tool combinations
+- Implement tool-specific error handling
+- Add tool-specific logging
+
+## Resources
+- [LangGraph Tools Documentation](https://langchain-ai.github.io/langgraphjs/agents/tools/)
+- Example implementation in `actions/3_tools.ts` 
