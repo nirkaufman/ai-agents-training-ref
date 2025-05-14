@@ -68,7 +68,7 @@ export async function submitUserMessage(input: string) {
       },
 
       bookFlight: {
-        description: 'book a flight',
+        description: 'book the flight',
         parameters: z.object({
           flightNumber: z.string().describe('The flight number'),
           passengerName:  z.string().describe('The passenger name'),

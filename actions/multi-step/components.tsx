@@ -1,14 +1,22 @@
 'use client';
 
-import {useState} from 'react';
+import {ReactNode, useState} from 'react';
 import {BookedFlight, Flight, FlightInformation, UserInfo} from "@/actions/multi-step/types";
+import {useActions, useUIState} from "ai/rsc";
 
 
 // Component to display flight search results
 export function FlightSearchResults({flights}: { flights: Flight[] }) {
+  const { submitUserMessage } = useActions();
+  const [_, setMessages] = useUIState();
 
-  const handleSelectedFlight = (flight: Flight) => {
-    console.log('selected flight', flight)
+  const handleSelectedFlight = async (flight: Flight) => {
+
+    const display = await submitUserMessage(
+        `lookupFlight details for flight number: ${flight.flightNumber}`,
+    );
+
+    setMessages((messages: ReactNode[]) => [...messages, display]);
   }
 
   return (
@@ -68,11 +76,19 @@ export function FlightSearchResults({flights}: { flights: Flight[] }) {
 
 // Component to display flight details for confirmation
 export function FlightDetails({flight}: { flight: FlightInformation; }) {
+  const { submitUserMessage } = useActions();
+  const [_, setMessages] = useUIState();
+
+
   const badgeColor = flight.bookingStatus === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   const seatCount = `${flight.availableSeats} seats available`;
 
-  const handleConfirmFlight = () => {
-    console.log('flight has been confirmed', flight)
+  const handleConfirmFlight = async () => {
+    const display = await submitUserMessage(
+        `confirm selected flight number ${flight.flightNumber} and proceed to booking`,
+    );
+
+    setMessages((messages: ReactNode[]) => [...messages, display]);
   }
 
   return (
@@ -154,22 +170,22 @@ export function FlightDetails({flight}: { flight: FlightInformation; }) {
 
 // Component to collect user information
 export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: string}) {
-  const [userInfo, setUserInfo] = useState<UserInfo>({
-    firstName: '',
-    lastName: '',
-    passportNumber: '',
-    email: '',
-    phone: ''
-  });
+  const { submitUserMessage } = useActions();
+  const [_, setMessages] = useUIState();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const {name, value} = e.target;
-    setUserInfo(prev => ({...prev, [name]: value}));
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(userInfo)
+
+    const form = e.target as HTMLFormElement;
+    const firstNameInput = form.firstName as HTMLInputElement;
+    const lastNameInput = form.lastName as HTMLInputElement;
+
+    const display = await submitUserMessage(
+        `book flight number ${flightNumber} under my name: ${firstNameInput.value} ${lastNameInput.value}`,
+    );
+
+    setMessages((messages: ReactNode[]) => [...messages, display]);
   };
 
   return (
@@ -188,8 +204,6 @@ export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: stri
                   name="firstName"
                   type="text"
                   required
-                  value={userInfo.firstName}
-                  onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="John"
               />
@@ -202,8 +216,6 @@ export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: stri
                   name="lastName"
                   type="text"
                   required
-                  value={userInfo.lastName}
-                  onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   placeholder="Doe"
               />
@@ -219,8 +231,6 @@ export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: stri
                 name="passportNumber"
                 type="text"
                 required
-                value={userInfo.passportNumber}
-                onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="AB1234567"
             />
@@ -235,8 +245,6 @@ export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: stri
                 name="email"
                 type="email"
                 required
-                value={userInfo.email}
-                onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="john.doe@example.com"
             />
@@ -251,8 +259,6 @@ export function CollectUserInfoForBooking({ flightNumber }: { flightNumber: stri
                 name="phone"
                 type="tel"
                 required
-                value={userInfo.phone}
-                onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="+1 (123) 456-7890"
             />
